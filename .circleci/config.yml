@@ -13,29 +13,28 @@ commands:
     steps:
       - run:
           name: Destroy environment
-          # ${CIRCLE_WORKFLOW_ID} is a Built-in environment variable 
-          # ${CIRCLE_WORKFLOW_ID:0:5} takes the first 5 chars of the variable CIRCLE_CI_WORKFLOW_ID 
+          # ${CIRCLE_WORKFLOW_ID} is a Built-in environment variable
+          # ${CIRCLE_WORKFLOW_ID:0:5} takes the first 5 chars of the variable CIRCLE_CI_WORKFLOW_ID
           when: on_fail
           command: |
             aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5}
 
 # Define the jobs we want to run for this project
 jobs:
-
   # CC6-L4-C16: Exercise: Infrastructure Creation
   create_infrastructure: # job name
-      # The primary container, where your job's commands will run
-      docker:
-        - image: amazon/aws-cli
-      steps:
-        - checkout
-        - run:
-            name: Create Cloudformation Stack
-            command: |
-              aws cloudformation deploy \
-                --template-file template.yml \
-                --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
-                --region us-west-2
+    # The primary container, where your job's commands will run
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Create Cloudformation Stack
+          command: |
+            aws cloudformation deploy \
+              --template-file template.yml \
+              --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
+              --region us-west-2
       # CC6-L4-C25: Exercise: Rollback
       # Fail the job intentionally to simulate an error.
       # Uncomment the line below if you want to fail the current step
@@ -43,19 +42,19 @@ jobs:
       - destroy_environment
 
   # CC6-L4-C19: Exercise: Configuration and Deployment
-  configure_infrastructure: 
+  configure_infrastructure:
     docker:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
       - add_ssh_keys:
           # Obtain ID from where SSH key is registered
-          fingerprints: ["88:5b:9d:8e:db:f6:38:22:80:dd:e3:7d:23:80:b7:0b"] 
+          fingerprints: ["88:5b:9d:8e:db:f6:38:22:80:dd:e3:7d:23:80:b7:0b"]
       - run:
           name: Install dependencies
           command: |
             # install the dependencies needed for your playbook
-            apk add --update ansible 
+            apk add --update ansible
       - run:
           name: Configure server
           command: |
@@ -83,7 +82,7 @@ jobs:
 workflows:
   myWorkflow:
     jobs:
-    # CC6-L4-C25: Exercise: Rollback of Infrastructure Creation
+      # CC6-L4-C25: Exercise: Rollback of Infrastructure Creation
       - create_infrastructure
 
     # CC6-L4-C19: Exercise: Configuration and Deployment
